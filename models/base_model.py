@@ -1,49 +1,51 @@
 #!/usr/bin/python3
-"""
-contains BaseModel definitions.
-"""
-
+"""This module defines a base class for all models in our hbnb clone"""
 import uuid
 from datetime import datetime
 from models import storage
 
 
-class BaseModel:
-    """
-    defines all common attributes/methods for other classes
-    """
+class BaseModel():
+    """ User class"""
 
     def __init__(self, *args, **kwargs):
-        """initializes object using dictionary if given otherwise
-        it gives default value
-        """
-        if kwargs:
-            for key, value in kwargs.items():
-                if key != '__class__':
-                    setattr(self, key, value)
-            self.created_at = datetime.fromisoformat(kwargs['created_at'])
-            self.updated_at = datetime.fromisoformat(kwargs['updated_at'])
-        else:
+        if len(kwargs) == 0:
             self.id = str(uuid.uuid4())
             self.created_at = datetime.now()
             self.updated_at = datetime.now()
-            storage.new(self)
+
+        else:
+            self.id = kwargs['id']
+            self.created_at = datetime.strptime(
+                kwargs
+                ['created_at'], "%Y-%m-%dT%H:%M:%S.%f"
+            )
+            self.updated_at = datetime.strptime(
+                kwargs
+                ['updated_at'], "%Y-%m-%dT%H:%M:%S.%f"
+            )
 
     def __str__(self):
-        """string repr of obj"""
-        return '[{}] ({}) {}'.format(self.__class__.__name__,
-                                     self.id, self.__dict__)
+        """ return the tring represantaion of an instance """
+        return "[{}] ({}) {}".format(
+            __class__.__name__,
+            self.id, self.__dict__
+        )
 
     def save(self):
-        """updates the public instance attribute"""
+        """ update the update time with the current time"""
         self.updated_at = datetime.now()
+        storage.new(self)
         storage.save()
 
     def to_dict(self):
-        """returns a dictionary containing all key/value of __dict__
-        of the instance"""
-        dic = vars(self).copy()
-        dic['__class__'] = self.__class__.__name__
-        dic['updated_at'] = self.updated_at.isoformat()
-        dic['created_at'] = self.created_at.isoformat()
+        """ Return a  dectionary containing all keys"""
+
+        created_at = self.created_at.isoformat()
+        updated_at = self.updated_at.isoformat()
+
+        dic = self.__dict__
+        dic['__class__'] = __class__.__name__
+        dic['created_at'] = created_at
+        dic['updated_at'] = updated_at
         return dic
