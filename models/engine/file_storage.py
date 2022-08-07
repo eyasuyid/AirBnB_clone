@@ -1,57 +1,41 @@
 #!/usr/bin/python3
-""" FileStorage module """
-
+"""Module for FileStorage class."""
 
 import json
+import os
 
 
 class FileStorage:
-    """ FileStorage class """
-
+    """ file storage class"""
     __file_path = "file.json"
     __objects = {}
 
     def all(self):
-        """
-            Function that returns the dictionary __objects
-        """
+        """ return the dictionary _object"""
         return FileStorage.__objects
 
     def new(self, obj):
-        """
-            Function that sets in __objects the obj with key
-            <obj class name>.id
-        """
-        FileStorage.__objects["{}.{}".format(type(obj).__name__, obj.id)] = obj
+        """ sets in __objects the obj with key <obj class name>.id"""
+        dkey = "{}.{}".format(type(obj).__name__, obj.id)
+        FileStorage.__objects[dkey] = obj.to_dict()
 
     def save(self):
-        """
-            Function that serializes __objects to the JSON file
-            (path: __file_path)
-        """
-        dict = {}
-        for key, value in FileStorage.__objects.items():
-            dict[key] = value.to_dict()
-        with open(self.__file_path, "w") as file:
-            json.dump(dict, file)
+        """serializes __objects to the JSON file (path: __file_path) """
+        if len(FileStorage.__objects) != 0:
+            serial_objs = json.dumps(FileStorage.__objects)
+
+            with open(FileStorage.__file_path, 'w') as f:
+                f.write(serial_objs)
 
     def reload(self):
-        """
-            deserializes the JSON file to __objects (only if the JSON file
-            (__file_path) exists ; otherwise, do nothing. If the file doesn’t
-            exist, no exception should be raised)
-        """
-        try:
-            from models.base_model import BaseModel
-            from models.user import User
-            from models.state import State
-            from models.city import City
-            from models.amenity import Amenity
-            from models.place import Place
-            from models.review import Review
-            with open(FileStorage.__file_path, 'r') as file:
-                for key, value in json.load(file).items():
-                    className = value['__class__']
-                    FileStorage.__objects[key] = eval(className)(**value)
-        except Exception:
-            pass
+        """ deserializes the JSON file to __objects """
+        FileStorage.__objects.clear()
+
+        if not os.path.isfile(FileStorage.__file_path):
+            return
+
+        if os.path.getsize(FileStorage.__file_path) == 0:
+            return
+
+        with open(FileStorage.__file_path, "r") as f:
+            FileStorage.__objects = json.loads(f.read())
