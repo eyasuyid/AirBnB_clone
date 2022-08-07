@@ -841,11 +841,7 @@ class ConsoleUpdateTest(unittest.TestCase):
                 "create {}".format(prmClassName)))
             id = output.getvalue().strip()
         with patch("sys.stdout", new=StringIO()) as output:
-<<<<<<< HEAD
             obj = self.__getObj(prmClassName, id)
-=======
-[O            obj = self.__getObj(prmClassName, id)
->>>>>>> tasks
             self.assertNotIn("first_name", obj.__dict__.keys())
             command = "{}.update(\"{}\", \"{}\", \"{}\")".format(
                 prmClassName, id, "first_name", "john")
